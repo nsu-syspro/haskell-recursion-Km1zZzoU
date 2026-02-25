@@ -7,12 +7,12 @@ module Task2 where
 
 -- Explicit import of Prelude to hide functions
 -- that are not supposed to be used in this assignment
-import Prelude hiding (filter, foldl, foldr, head, init, last, length, map, read, reverse, show, sum, tail)
+import Prelude hiding (filter, foldl, foldr, init, last, length, map, read, reverse, show, sum)
 
 -- You can reuse already implemented functions from Task1
 -- by listing them in this import clause
 -- NOTE: only listed functions are imported, everything else remains hidden
-import Task1 (map, reverse, sum)
+import Task1 (map, reverse, sum, toDigits, doubleEveryOther)
 
 -----------------------------------
 --
@@ -25,7 +25,15 @@ import Task1 (map, reverse, sum)
 -- 1
 
 luhnModN :: Int -> (a -> Int) -> [a] -> Int
-luhnModN = error "TODO: define luhnModN"
+luhnModN n to_int xs = mod (n - mod s n) n
+  where
+    digits = map to_int xs
+    s = sum (map (normalizeModN n) (doubleEveryOther (reverse digits)))
+
+    normalizeModN :: Int -> Int -> Int
+    normalizeModN m x
+      | x >= m    = x - (m - 1)
+      | otherwise = x
 
 -----------------------------------
 --
@@ -37,7 +45,7 @@ luhnModN = error "TODO: define luhnModN"
 -- 1
 
 luhnDec :: [Int] -> Int
-luhnDec = error "TODO: define luhnDec"
+luhnDec = luhnModN 10 id
 
 -----------------------------------
 --
@@ -49,7 +57,7 @@ luhnDec = error "TODO: define luhnDec"
 -- 15
 
 luhnHex :: [Char] -> Int
-luhnHex = error "TODO: define luhnHex"
+luhnHex = luhnModN 16 digitToInt
 
 -----------------------------------
 --
@@ -65,7 +73,11 @@ luhnHex = error "TODO: define luhnHex"
 -- [10,11,12,13,14,15]
 
 digitToInt :: Char -> Int
-digitToInt = error "TODO: define digitToInt"
+digitToInt c
+  | c >= '0' && c <= '9' = fromEnum c - fromEnum '0'
+  | c >= 'a' && c <= 'f' = fromEnum c - fromEnum 'a' + 10
+  | c >= 'A' && c <= 'F' = fromEnum c - fromEnum 'A' + 10
+  | otherwise = error "Invalid hexadecimal digit"
 
 -----------------------------------
 --
@@ -82,7 +94,19 @@ digitToInt = error "TODO: define digitToInt"
 -- False
 
 validateDec :: Integer -> Bool
-validateDec = error "TODO: define validateDec"
+validateDec n = 
+  let digits = toDigits n
+  in case digits of
+       [] -> False
+       _  -> let (initDigits, checkDigit) = getInitAndLast digits
+             in luhnDec initDigits == checkDigit
+  where
+    getInitAndLast :: [a] -> ([a], a)
+    getInitAndLast xs = 
+      let rev = reverse xs
+      in case rev of
+           [] -> error "empty"
+           (y:ys) -> (reverse ys, y)
 
 -----------------------------------
 --
@@ -99,4 +123,11 @@ validateDec = error "TODO: define validateDec"
 -- False
 
 validateHex :: [Char] -> Bool
-validateHex = error "TODO: define validateHex"
+validateHex s
+  | null s = False
+  | otherwise =
+      case reverse s of
+        [] -> False
+        (checkChar:rest) -> 
+          let initChars = reverse rest
+          in luhnHex initChars == digitToInt checkChar
