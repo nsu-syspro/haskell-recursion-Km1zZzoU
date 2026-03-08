@@ -5,7 +5,7 @@ module Task1 where
 
 -- Explicit import of Prelude to hide functions
 -- that are not supposed to be used in this assignment
-import Prelude hiding (filter, foldl, foldr, head, length, map, read, reverse, show, sum, tail)
+import Prelude hiding (filter, foldl, foldr, head, init, last, length, map, read, reverse, show, sum, tail)
 
 -----------------------------------
 --
@@ -22,11 +22,13 @@ import Prelude hiding (filter, foldl, foldr, head, length, map, read, reverse, s
 -- False
 
 validate :: Integer -> Bool
-validate n = luhn initDigits == checkDigit
-  where
-    digits = toDigits n
-    initDigits = init digits
-    checkDigit = last digits
+validate n = 
+  let digits = toDigits n
+  in case reverse digits of
+       [] -> False
+       (checkDigit:rest) -> 
+         let initDigits = reverse rest
+         in luhn initDigits == checkDigit
 
 -----------------------------------
 --
