@@ -7,7 +7,7 @@ module Task2 where
 
 -- Explicit import of Prelude to hide functions
 -- that are not supposed to be used in this assignment
-import Prelude hiding (filter, foldl, foldr, init, last, length, map, read, reverse, show, sum)
+import Prelude hiding (filter, foldl, foldr, head, init, last, length, map, read, reverse, show, sum)
 
 -- You can reuse already implemented functions from Task1
 -- by listing them in this import clause
@@ -103,8 +103,7 @@ validateDec n =
   where
     getInitAndLast :: [a] -> ([a], a)
     getInitAndLast xs = 
-      let rev = reverse xs
-      in case rev of
+      case reverse xs of
            [] -> error "empty"
            (y:ys) -> (reverse ys, y)
 
@@ -123,11 +122,9 @@ validateDec n =
 -- False
 
 validateHex :: [Char] -> Bool
-validateHex s
-  | null s = False
-  | otherwise =
-      case reverse s of
-        [] -> False
-        (checkChar:rest) -> 
-          let initChars = reverse rest
-          in luhnHex initChars == digitToInt checkChar
+validateHex s =
+  case reverse s of
+    [] -> False
+    (checkChar:rest) -> 
+      let initChars = reverse rest
+      in luhnHex initChars == digitToInt checkChar
